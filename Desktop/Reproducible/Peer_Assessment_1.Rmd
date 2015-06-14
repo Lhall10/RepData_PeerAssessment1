@@ -1,0 +1,101 @@
+---
+title: "Peer Assessment 1"
+author: "Lhall10"
+date: "Sunday, June 14, 2015"
+output: html_document
+---
+
+## Loading and Processing the Data
+
+Here is the code which loads the data:
+
+```{r}
+setwd("C:/Users/user/Desktop/Coursera Data Science Sequence/Reproducible")
+data <- read.csv("./activity.csv")
+data2 <- na.omit(data)
+```
+
+##Mean Total Number of Steps Taken per Day
+Here is the histogram for the total steps per day:
+
+```{r}
+totalsteps<-tapply(data2$steps, data2$date, sum)
+
+hist(totalsteps)
+```
+
+
+
+Here is the median and the mean for the total steps per day:
+
+```{r}
+mean(data2$steps)
+
+median(data2$steps)
+```
+
+
+##Average Daily Activity pattern
+Here is the time series plot for the average number of steps taken:
+
+```{r}
+avg <- tapply(data2$steps, data2$interval, mean)
+intavg<-as.data.frame(avg)
+intavg$interval <- data2[1:288,3]
+plot(x = intavg$interval, y = intavg$avg, type = "l", xlab = "Interval", ylab = "Average Steps")
+```
+
+Here is the 5-minute interval which contains the largest average number of steps:
+
+```{r}
+subset(intavg, intavg$avg == max(intavg$avg))
+```
+
+##Inputing missing values
+Here is the total number of missing values:
+
+```{r}
+sum(is.na(data))
+```
+
+Here the code which fills in the missing values using the average number of steps per interval:
+
+```{r}
+data[is.na(data)]<- avg
+```
+Here is the histogram, mean, and median for the total number of steps taken for the completed data set:
+
+```{r}
+totalsteps2<-tapply(data$steps, data$date, sum)
+
+hist(totalsteps2)
+
+mean(data$steps)
+
+median(data$steps)
+```
+
+
+The results from the complete data set do not appear to be very different from those generated from the incomplete data set
+
+
+##Differences in Activity Patterns between Weekdays and Weekends
+Here is how to create a new factor variable which will differentiate between weekends and weekdays:
+
+```{r}
+data$date <- as.Date(data$date)
+wedays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+enddays <- c("Saturday", "Sunday")
+data$day <- weekdays(data$date)
+data$day[data$day %in% wedays] <- "weekday"
+data$day[data$day %in% enddays] <- "weekend"
+data$day <- as.factor(data$day)
+```
+
+Here is a panel plot comparing activity patterns between the two time frames:
+
+```{r}
+library(lattice)
+
+xyplot(steps ~ interval|day, data = data, type = "a")
+```
